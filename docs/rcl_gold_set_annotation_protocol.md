@@ -69,6 +69,12 @@ HTML index and `calibration_review_sheet.csv`. Use it as a navigation and data
 entry aid. The review sheet is still provisional until the decisions are copied
 into `annotations.csv` and validated.
 
+`scripts/rcl_draft_calibration_review.py` can draft conservative suggestions
+from local extracted text, filenames and machine observations. These suggestions
+must be accepted or edited by a reviewer before they become annotation evidence.
+Legal status remains `review_needed` unless a dedicated legal review is
+completed.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.

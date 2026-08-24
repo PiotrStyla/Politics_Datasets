@@ -164,11 +164,35 @@ pilot rows.
 The review pack links local raw documents and local extracted text. It should
 not be published before legal and PII review.
 
+## Draft Calibration Review v0.1
+
+`scripts/rcl_draft_calibration_review.py` created conservative draft
+suggestions:
+
+- Suggestions CSV:
+  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.csv`.
+- Suggestions summary:
+  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.md`.
+- Rows: 10.
+- Draft document types: 8 `organization_comment`, 2 `government_response`.
+- Draft source types: 3 `ngo`, 2 `employer_organization`, 2 `public_body`,
+  2 `religious_organization`, 1 `professional_body`.
+- Draft PII status: 4 `yes`, 6 `uncertain`.
+- Draft extraction quality: 8 `good`, 2 `not_extractable`.
+- Draft training recommendation: 8 `conditional`, 2 `exclude`.
+- Legal status: all 10 remain `review_needed`.
+
+These rows are not final human annotations and do not create legal/training
+claims. They are a starting point for reviewer calibration.
+
 ## Next Tasks
 
 - Complete manual review of the 10 calibration rows in
   `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_sheet.csv`, using
   `data/rcl_gold_pilot_v0_1/review_pack/index.html` as the navigation surface.
+- Compare against
+  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.csv` and
+  explicitly accept or edit each suggested value.
 - After calibration, apply settled fields to
   `data/rcl_gold_pilot_v0_1/annotations.csv`.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.

@@ -87,6 +87,12 @@ Lokalny HTML/CSV review pack dla kolejki kalibracyjnej:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_build_review_pack.py --actor PiotrSty
 ```
 
+Konserwatywne draft-sugestie do kalibracyjnego review:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_draft_calibration_review.py --actor Codex-assisted
+```
+
 Instrukcja recenzji znajduje sie w
 `docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
 lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
@@ -115,6 +121,9 @@ Skrypt zapisuje dane w `data/rcl/`:
   pierwszego manual review.
 - `rcl_gold_pilot_v0_1/review_pack/` - lokalny HTML/CSV do kalibracyjnego
   review; zawiera linki do lokalnych plikow i nie jest artefaktem do publikacji.
+- `rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.csv` -
+  konserwatywne draft-sugestie; wymagaja akceptacji/edycji recenzenta przed
+  przeniesieniem do `annotations.csv`.
 
 ## Uwagi techniczne
 
