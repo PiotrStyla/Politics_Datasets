@@ -49,6 +49,24 @@ Kolejka do recznego review z manifestu konsultacji:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_review_queue.py --limit 100 --per-priority 40
 ```
 
+Ograniczony pilot gold setu: pobranie 40 dokumentow `priority=1`, manifest
+SHA-256 i tabela do anotacji:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_gold_pilot.py
+```
+
+Walidacja zgodnosci manifestu, plikow i tabeli anotacji:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_gold_pilot.py
+```
+
+Instrukcja recenzji znajduje sie w
+`docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
+lokalne do czasu review legal/PII; na Hugging Face nalezy publikowac najpierw
+manifest, checksums, opis runu i szablon anotacji.
+
 ## Wyniki
 
 Skrypt zapisuje dane w `data/rcl/`:
@@ -61,6 +79,8 @@ Skrypt zapisuje dane w `data/rcl/`:
 - `runs/rcl_run_*.json` - audytowalny opis runu: argumenty, liczniki i sciezki
   wynikow.
 - `review_queue.csv` - opcjonalna kolejka dokumentow do manual review.
+- `rcl_gold_pilot_v0_1/` - lokalny pilot: manifest, tabela anotacji, checksums,
+  run i 40 dokumentow do recenzji.
 
 ## Uwagi techniczne
 

@@ -93,12 +93,35 @@ evidence.
 - Older years may contain more mature consultation responses than the newest
   open projects, so 2025 is a strong next metadata batch candidate.
 
+## Gold Review Pilot v0.1
+
+Completed on 2026-08-24 with `scripts/rcl_gold_pilot.py`:
+
+- Selection: 40 deterministic `priority=1` queue rows.
+- Downloads: 40 successful, 0 failures.
+- Formats: 34 PDF and 6 DOCX.
+- Total local payload: 16,391,096 bytes.
+- Uniqueness: 40 source URLs and 40 SHA-256 digests.
+- Manifest SHA-256:
+  `38f3fde085c3ce8ba79af68e4205f9118f314be2447e4b50936d4403e82b00d4`.
+- Validation: pass, with the expected warning that 0 manual reviews are
+  complete.
+- HF commit:
+  `9baef9826ba68c73493fd1d31a8c2d784e13828f`.
+- HF immutable tag: `v0.1.0-metadata`.
+
+The HF artifact contains the manifest, checksums, annotation table, protocol,
+run evidence and validation report. Raw PDF/DOCX binaries remain local until
+document-level legal and PII review.
+
 ## Next Tasks
 
-- Add checkpoint/resume writes to `scripts/rcl_downloader.py`.
-- Normalize document file extensions and preserve original filenames.
-- Generate a `source_manifest.jsonl` profile aligned with the Slayer ontology:
-  source object, version digest, relation to raw HTML and document metadata.
-- Run manual review on `review_queue.csv`.
-- After review, download only approved or review-needed binaries, starting with
-  priority-1 PDF documents.
+- Complete manual review of the 40 pilot rows in
+  `data/rcl_gold_pilot_v0_1/annotations.csv`.
+- Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
+- Summarize annotation evidence and formulate only claims supported by the
+  reviewed sample.
+- Add checkpoint/resume writes to `scripts/rcl_downloader.py` before larger
+  source batches.
+- Normalize document file extensions and preserve original filenames for later
+  extraction runs.
