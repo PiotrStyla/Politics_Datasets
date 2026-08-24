@@ -285,6 +285,11 @@ service is not a blanket license assignment and does not clear redistribution,
 text release or pretraining use by itself. Legal review must still verify
 attribution, reuse, copyright/database-right and PII constraints.
 
+`scripts/rcl_make_legal_review_pack.py` turns that premise into a metadata-only
+review queue for legal reviewers. The pack keeps source URLs, checksums,
+document classifications, PII flags and empty legal decision fields together,
+without publishing raw documents or extracted text.
+
 ## Next Tasks
 
 - Prepare the metadata-only HF snapshot for the completed 40-row pilot review.

@@ -95,6 +95,12 @@ Konserwatywne draft-sugestie do kalibracyjnego review:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_draft_calibration_review.py --actor Codex-assisted
 ```
 
+Paczka dla review prawnego, bez surowych dokumentow i bez extracted text:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_make_legal_review_pack.py --actor PiotrSty
+```
+
 Dry-run przeniesienia zaakceptowanych rekordow kalibracyjnych do
 `annotations.csv`:
 
@@ -153,6 +159,9 @@ Skrypt zapisuje dane w `data/rcl/`:
 - `rcl_gold_pilot_v0_1/remaining_review_queue.csv` i
   `rcl_gold_pilot_v0_1/remaining_review_pack/` - lokalna paczka review dla
   30 rekordow, ktore pozostaly po zaakceptowanej kalibracji.
+- `rcl_gold_pilot_v0_1/legal_review_pack/` - metadata-only kolejka dla legal
+  review: dokumentowe provenance, working premise, PII flags i puste pola
+  decyzyjne dla prawnika.
 
 ## Uwagi techniczne
 

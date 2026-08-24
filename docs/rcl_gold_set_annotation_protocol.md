@@ -92,6 +92,11 @@ After the 10-row calibration subset is accepted, use
 unreviewed rows. Build a separate `remaining_review_pack/` so calibration
 evidence and remaining-row draft suggestions do not overwrite each other.
 
+Use `scripts/rcl_make_legal_review_pack.py` after manual annotation to create a
+metadata-only legal review queue. This pack should include the working RCL/RPL
+reuse premise, row-level provenance, PII flags and empty legal decision fields,
+but no raw documents and no extracted text.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.
