@@ -149,10 +149,27 @@ Extracted text remains local until legal and PII review.
 Use this queue to calibrate reviewer interpretation before annotating all 40
 pilot rows.
 
+## Review Pack v0.1
+
+`scripts/rcl_build_review_pack.py` created a local-only review pack:
+
+- HTML index:
+  `data/rcl_gold_pilot_v0_1/review_pack/index.html`.
+- Editable review sheet:
+  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_sheet.csv`.
+- Protocol copy:
+  `data/rcl_gold_pilot_v0_1/review_pack/annotation_protocol.md`.
+- Rows: 10.
+
+The review pack links local raw documents and local extracted text. It should
+not be published before legal and PII review.
+
 ## Next Tasks
 
 - Complete manual review of the 10 calibration rows in
-  `data/rcl_gold_pilot_v0_1/calibration_queue.csv`, then apply settled rules to
+  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_sheet.csv`, using
+  `data/rcl_gold_pilot_v0_1/review_pack/index.html` as the navigation surface.
+- After calibration, apply settled fields to
   `data/rcl_gold_pilot_v0_1/annotations.csv`.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.

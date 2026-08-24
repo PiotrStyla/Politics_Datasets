@@ -81,6 +81,12 @@ Kolejka 10 dokumentow do kalibracyjnego manual review:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_make_calibration_queue.py --actor PiotrSty
 ```
 
+Lokalny HTML/CSV review pack dla kolejki kalibracyjnej:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_build_review_pack.py --actor PiotrSty
+```
+
 Instrukcja recenzji znajduje sie w
 `docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
 lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
@@ -107,6 +113,8 @@ Skrypt zapisuje dane w `data/rcl/`:
   triage, nie recenzja czlowieka.
 - `rcl_gold_pilot_v0_1/calibration_queue.csv` - 10-row calibration set do
   pierwszego manual review.
+- `rcl_gold_pilot_v0_1/review_pack/` - lokalny HTML/CSV do kalibracyjnego
+  review; zawiera linki do lokalnych plikow i nie jest artefaktem do publikacji.
 
 ## Uwagi techniczne
 

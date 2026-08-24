@@ -64,6 +64,11 @@ triage evidence only:
 extractions, clean text baselines and PII-triage examples so reviewers can align
 on the protocol before annotating all 40 rows.
 
+`scripts/rcl_build_review_pack.py` can create a local `review_pack/` with an
+HTML index and `calibration_review_sheet.csv`. Use it as a navigation and data
+entry aid. The review sheet is still provisional until the decisions are copied
+into `annotations.csv` and validated.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.
