@@ -1,0 +1,42 @@
+# Python/runtime
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local environment and credentials
+.env
+.env.*
+*.pem
+*.key
+*.token
+hf_token*
+
+# Dataset artifacts belong on Hugging Face, not GitHub
+data/
+*.parquet
+*.arrow
+*.jsonl
+*.jsonl.gz
+*.csv.gz
+*.zst
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.pdf
+*.doc
+*.docx
+*.docm
+*.odt
+*.xlsx
+*.msg
+*.xades
+
+# Local scratch/output
+tmp/
+output/
+logs/
