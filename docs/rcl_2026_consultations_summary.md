@@ -272,6 +272,19 @@ The full pilot now has completed annotation evidence, but it is still not a
 training-ready corpus. Legal review, PII scrubbing and OCR/manual remediation
 remain open protocol stages.
 
+## Legal Review Premise
+
+`docs/rcl_legal_review_note.md` adds the working legal-review framing for RCL
+rows. The pilot treats the files as public official RCL/RPL source documents
+from `legislacja.gov.pl`, with a plausible public-sector information reuse path
+to be reviewed. This is why the rows are reviewed under
+`legal_status=review_needed` rather than treated as blocked.
+
+The note also preserves the boundary: public availability in the official RPL
+service is not a blanket license assignment and does not clear redistribution,
+text release or pretraining use by itself. Legal review must still verify
+attribution, reuse, copyright/database-right and PII constraints.
+
 ## Next Tasks
 
 - Prepare the metadata-only HF snapshot for the completed 40-row pilot review.

@@ -2,6 +2,8 @@
 
 Roboczy kontekst metodologiczny dla szerszego projektu Polish Dynaword:
 [docs/polish_dynaword_research_frame.md](docs/polish_dynaword_research_frame.md).
+Notatka dla legal review RCL:
+[docs/rcl_legal_review_note.md](docs/rcl_legal_review_note.md).
 
 Ten katalog zawiera narzedzia do pobierania publicznych danych z
 `legislacja.gov.pl`, ze szczegolnym naciskiem na:
@@ -115,10 +117,11 @@ Kolejka i review pack dla pozostalych niezaakceptowanych rekordow:
 ```
 
 Instrukcja recenzji znajduje sie w
-`docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
-lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
-lokalny. Na Hugging Face nalezy publikowac najpierw manifesty, checksums, opisy
-runow, machine-observations bez snippetow i szablon anotacji.
+`docs/rcl_gold_set_annotation_protocol.md`; notatka dla review prawnego w
+`docs/rcl_legal_review_note.md`. Surowe dokumenty pilota pozostaja lokalne do
+czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje lokalny. Na
+Hugging Face nalezy publikowac najpierw manifesty, checksums, opisy runow,
+machine-observations bez snippetow i szablon anotacji.
 
 ## Wyniki
 

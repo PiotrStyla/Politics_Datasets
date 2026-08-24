@@ -36,6 +36,12 @@ the source page, relevant public-information basis or applicable rights notice.
 Use `exclusion_reason` whenever `legal_status=exclude` or
 `train_recommendation=exclude`.
 
+For RCL/RPL documents, use `docs/rcl_legal_review_note.md` as the starting
+point. The default stance is: public official RCL/RPL source document, plausible
+public-sector information reuse path, but no blanket dataset license and no
+training-clearance claim before legal review. In this sense,
+`legal_status=review_needed` means "not yet cleared", not "blocked".
+
 ## Review procedure
 
 1. Confirm that the downloaded artifact matches the listed title and source URL.

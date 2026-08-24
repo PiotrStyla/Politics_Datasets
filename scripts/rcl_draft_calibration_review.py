@@ -47,6 +47,15 @@ ORG_PATTERNS = [
     ("ngo", re.compile(r"amnesty international|ordo iuris|helsi[nń]sk|watchdog|fundacja|stowarzyszenie", re.IGNORECASE)),
 ]
 
+LEGAL_BASIS_NOTE = (
+    "Working premise: public RCL/RPL source document from the official Rządowy Proces "
+    "Legislacyjny service. RCL BIP identifies government draft acts and related documents "
+    "as published in RPL; public-sector information reuse should be reviewed under the "
+    "current open-data/public-sector information reuse regime. No blanket dataset license "
+    "assigned; verify attribution, reuse, copyright/database-right and PII constraints "
+    "before text release or training use."
+)
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -140,10 +149,7 @@ def draft_row(root: Path, row: dict[str, str], reviewer: str, reviewed_at: str) 
     train_recommendation, exclusion_reason = recommendation(extraction_quality, contains_pii, doc_type)
     if train_recommendation == "conditional":
         exclusion_reason = ""
-    legal_basis = (
-        "RCL source URL recorded; document-specific copyright/public-information and PII basis "
-        "requires legal review before release."
-    )
+    legal_basis = LEGAL_BASIS_NOTE
     review_notes = (
         f"Draft suggestion only. Doc type: {doc_basis}. Source type: {source_basis}. "
         f"PII: {pii_basis}."
