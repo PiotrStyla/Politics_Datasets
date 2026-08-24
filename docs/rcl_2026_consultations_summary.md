@@ -205,18 +205,28 @@ The script writes `review_pack/calibration_apply_report.json` and requires
 (`accepted`, `reviewed` or `approved`) and reviewer metadata before copying
 fields into the main annotation table.
 
+## Accepted Calibration Review v0.1
+
+After user acceptance on 2026-08-24,
+`scripts/rcl_apply_calibration_review.py --commit` copied the 10 accepted
+calibration rows into `data/rcl_gold_pilot_v0_1/annotations.csv`.
+
+- Apply status: pass.
+- Applied rows: 10.
+- Validation: `scripts/rcl_validate_gold_pilot.py` pass.
+- Reviewed rows in `annotations.csv`: 10 of 40.
+- Accepted document types: 8 `organization_comment`, 2 `government_response`.
+- Accepted training recommendations: 8 `conditional`, 2 `exclude`.
+- Legal status: all 10 remain `review_needed`.
+
+These accepted rows are annotation evidence for the calibration subset. They do
+not establish a training-eligible release because document-level legal review is
+still open.
+
 ## Next Tasks
 
-- Complete manual review of the 10 calibration rows in
-  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_sheet.csv`, using
-  `data/rcl_gold_pilot_v0_1/review_pack/index.html` as the navigation surface.
-- Compare against
-  `data/rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.csv` and
-  explicitly accept or edit each suggested value.
-- After calibration, apply settled fields to
+- Continue manual review for the remaining 30 pilot rows in
   `data/rcl_gold_pilot_v0_1/annotations.csv`.
-- Use `scripts/rcl_apply_calibration_review.py --commit` only after accepted
-  statuses and reviewer metadata are present.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
