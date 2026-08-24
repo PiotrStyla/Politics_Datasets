@@ -248,13 +248,33 @@ subset:
 
 No remaining-row suggestions were copied into `annotations.csv`.
 
+## Accepted Full Pilot Review v0.1
+
+After user acceptance of the remaining 30 rows on 2026-08-24,
+`scripts/rcl_apply_calibration_review.py --source remaining_review_pack/remaining_review_suggestions.csv --commit`
+copied the accepted remaining-review rows into
+`data/rcl_gold_pilot_v0_1/annotations.csv`.
+
+- Apply status: pass.
+- Newly applied rows: 30.
+- Total reviewed rows in `annotations.csv`: 40 of 40.
+- Validation: `scripts/rcl_validate_gold_pilot.py` pass, with no warnings.
+- Accepted document types: 38 `organization_comment`, 2 `government_response`.
+- Accepted source types: 18 `unknown`, 7 `ngo`, 5 `employer_organization`,
+  4 `professional_body`, 4 `religious_organization`, 2 `public_body`.
+- Accepted PII status: 34 `yes`, 6 `uncertain`.
+- Accepted extraction quality: 33 `good`, 3 `usable`, 2 `poor`,
+  2 `not_extractable`.
+- Accepted training recommendations: 38 `conditional`, 2 `exclude`.
+- Legal status: all 40 remain `review_needed`.
+
+The full pilot now has completed annotation evidence, but it is still not a
+training-ready corpus. Legal review, PII scrubbing and OCR/manual remediation
+remain open protocol stages.
+
 ## Next Tasks
 
-- Review or accept/edit the 30 rows in
-  `data/rcl_gold_pilot_v0_1/remaining_review_pack/remaining_review_suggestions.csv`.
-- If accepted, set `manual_review_status=accepted` and reviewer metadata, then
-  run `scripts/rcl_apply_calibration_review.py --source remaining_review_pack/remaining_review_suggestions.csv --commit`.
-- Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
+- Prepare the metadata-only HF snapshot for the completed 40-row pilot review.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
   reviewed sample.
