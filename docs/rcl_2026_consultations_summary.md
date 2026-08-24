@@ -114,11 +114,48 @@ The HF artifact contains the manifest, checksums, annotation table, protocol,
 run evidence and validation report. Raw PDF/DOCX binaries remain local until
 document-level legal and PII review.
 
+## Text Extraction Pilot v0.1
+
+Completed on 2026-08-24 with `scripts/rcl_extract_pilot_text.py`:
+
+- Input: the 40-document `data/rcl_gold_pilot_v0_1/source_manifest.jsonl`.
+- Local text outputs: `data/rcl_gold_pilot_v0_1/extracted_text/`.
+- Text extraction rows: 40.
+- Status: 38 extracted, 2 empty-text extractions.
+- Text payload: 901,490 bytes of local UTF-8 text.
+- Machine extraction-quality hints: 33 good, 3 usable, 2 poor, 2 not
+  extractable.
+- Machine PII hints: 34 yes, 6 uncertain.
+- Machine document-type hints after category-first correction: 40
+  organization_comment.
+- Extraction manifest SHA-256:
+  `c9c3b7de41436b61e104b34653b7732d20e8865c28449337a8aeb22bf958627d`.
+- Validation: pass, with expected warnings that empty/low-quality extraction
+  and PII hints require manual review.
+
+The extraction stage creates evidence for triage only. It does not update the
+manual annotation fields and does not create training-eligibility claims.
+Extracted text remains local until legal and PII review.
+
+## Calibration Queue v0.1
+
+`scripts/rcl_make_calibration_queue.py` created
+`data/rcl_gold_pilot_v0_1/calibration_queue.csv` with 10 rows:
+
+- 2 `ocr_or_scan_review` rows for empty-text PDFs.
+- 4 `clean_text_baseline` rows with good extraction and no machine PII hit.
+- 4 `pii_triage_baseline` rows with good extraction and machine PII hints.
+
+Use this queue to calibrate reviewer interpretation before annotating all 40
+pilot rows.
+
 ## Next Tasks
 
-- Complete manual review of the 40 pilot rows in
+- Complete manual review of the 10 calibration rows in
+  `data/rcl_gold_pilot_v0_1/calibration_queue.csv`, then apply settled rules to
   `data/rcl_gold_pilot_v0_1/annotations.csv`.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
+- Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
   reviewed sample.
 - Add checkpoint/resume writes to `scripts/rcl_downloader.py` before larger

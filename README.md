@@ -62,10 +62,30 @@ Walidacja zgodnosci manifestu, plikow i tabeli anotacji:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_gold_pilot.py
 ```
 
+Lokalna ekstrakcja tekstu z dokumentow pilota oraz machine-observations do
+triage:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_extract_pilot_text.py --actor PiotrSty
+```
+
+Walidacja ekstrakcji:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_extraction.py
+```
+
+Kolejka 10 dokumentow do kalibracyjnego manual review:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_make_calibration_queue.py --actor PiotrSty
+```
+
 Instrukcja recenzji znajduje sie w
 `docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
-lokalne do czasu review legal/PII; na Hugging Face nalezy publikowac najpierw
-manifest, checksums, opis runu i szablon anotacji.
+lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
+lokalny. Na Hugging Face nalezy publikowac najpierw manifesty, checksums, opisy
+runow, machine-observations bez snippetow i szablon anotacji.
 
 ## Wyniki
 
@@ -81,6 +101,12 @@ Skrypt zapisuje dane w `data/rcl/`:
 - `review_queue.csv` - opcjonalna kolejka dokumentow do manual review.
 - `rcl_gold_pilot_v0_1/` - lokalny pilot: manifest, tabela anotacji, checksums,
   run i 40 dokumentow do recenzji.
+- `rcl_gold_pilot_v0_1/extracted_text/` - lokalne ekstrakty tekstowe; nie
+  publikowac przed legal/PII review.
+- `rcl_gold_pilot_v0_1/machine_observations.csv` - automatyczne wskazowki do
+  triage, nie recenzja czlowieka.
+- `rcl_gold_pilot_v0_1/calibration_queue.csv` - 10-row calibration set do
+  pierwszego manual review.
 
 ## Uwagi techniczne
 

@@ -46,6 +46,24 @@ Use `exclusion_reason` whenever `legal_status=exclude` or
 6. Make a training recommendation separately from the legal observation.
 7. Enter reviewer identity, UTC review time and a concise note.
 
+## Machine triage
+
+`scripts/rcl_extract_pilot_text.py` may create local extracted text,
+`extraction_manifest.jsonl` and `machine_observations.csv`. Treat these as
+triage evidence only:
+
+- Machine hints do not overwrite `manual_*`, `contains_pii`, `legal_status`,
+  `extraction_quality` or `train_recommendation`.
+- Do not copy text snippets into publishable metadata before legal/PII review.
+- Empty text usually means OCR or manual inspection is needed, not that the
+  document has no content.
+- PII hints are recall-oriented and may include false positives; reviewers must
+  confirm them before claims or release decisions.
+
+`calibration_queue.csv` is the recommended first manual pass. It mixes empty
+extractions, clean text baselines and PII-triage examples so reviewers can align
+on the protocol before annotating all 40 rows.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.
@@ -53,11 +71,15 @@ Use `exclusion_reason` whenever `legal_status=exclude` or
   download and registration stage.
 - Each execution is a `Run` with pinned selection parameters.
 - Completed annotation rows are `Evidence` produced by an identified `Actor`.
+- Extracted text is a local `Object`/`Version` with a `DERIVED_FROM` relation to
+  the source file. Machine observations are evidence for triage, not final
+  claims.
 - Aggregate interpretations are later `Claim` objects; the pilot creates none
   before review.
 
 ## Publication rule
 
 Before legal and PII review, publish only metadata, manifests, checksums, run
-summaries and the annotation template. Keep downloaded binaries local. A later
-version may include only artifacts whose evidence supports that release.
+summaries, machine-observations without text snippets and the annotation
+template. Keep downloaded binaries and extracted text local. A later version may
+include only artifacts whose evidence supports that release.
