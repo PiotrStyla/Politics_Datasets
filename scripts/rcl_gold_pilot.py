@@ -9,6 +9,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -114,7 +115,30 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def write_checksums(output_dir: Path, raw_dir: Path) -> None:
+    checksums = []
+    for path in sorted(raw_dir.glob("*")):
+        if path.is_file():
+            checksums.append(f"{sha256_file(path)}  {path.relative_to(output_dir).as_posix()}")
+    (output_dir / "checksums.sha256").write_text("\n".join(checksums) + "\n", encoding="ascii")
+
+
+def checkpoint_outputs(
+    output_dir: Path,
+    raw_dir: Path,
+    manifest: list[dict[str, object]],
+    annotations: list[dict[str, str]],
+    failures: list[dict[str, str]],
+) -> None:
+    write_jsonl(output_dir / "source_manifest.jsonl", manifest)
+    write_csv(output_dir / "annotations.csv", annotations)
+    write_jsonl(output_dir / "download_failures.jsonl", failures)
+    write_checksums(output_dir, raw_dir)
+
+
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description="Build the bounded RCL gold-set review pilot.")
     parser.add_argument("--queue", default="data/rcl_2026_consultations/review_queue.csv")
     parser.add_argument("--output-dir", default="data/rcl_gold_pilot_v0_1")
@@ -243,6 +267,7 @@ def main() -> int:
         except Exception as exc:
             failures.append({"queue_id": queue_id, "document_url": row["document_url"], "error": str(exc)})
             print(f"ERROR {queue_id}: {exc}")
+        checkpoint_outputs(output_dir, raw_dir, manifest, annotations, failures)
 
     manifest_path = output_dir / "source_manifest.jsonl"
     annotation_path = output_dir / "annotations.csv"
@@ -250,12 +275,7 @@ def main() -> int:
     write_jsonl(manifest_path, manifest)
     write_csv(annotation_path, annotations)
     write_jsonl(failure_path, failures)
-
-    checksums = []
-    for path in sorted(raw_dir.glob("*")):
-        if path.is_file():
-            checksums.append(f"{sha256_file(path)}  {path.relative_to(output_dir).as_posix()}")
-    (output_dir / "checksums.sha256").write_text("\n".join(checksums) + "\n", encoding="ascii")
+    write_checksums(output_dir, raw_dir)
 
     finished_at = utc_now()
     run = {

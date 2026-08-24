@@ -325,10 +325,53 @@ with machine observations and draft suggestions. Raw documents and extracted
 text remain local; publish only metadata, manifests, checksums, run evidence and
 snippet-free machine observations before legal/PII review.
 
+After user acceptance, the 42 draft suggestions were copied into
+`data/rcl_remaining_consultations_v0_1/annotations.csv`, validated, and a
+metadata-only legal review pack was generated for those rows. These 42 rows are
+now human-accepted annotation evidence, but all remain
+`legal_status=review_needed`.
+
+## Selected 1000 Queue
+
+`data/rcl_2026_consultations/review_queue_1000.csv` contains the full 1000
+selected-document queue for the 2026 RCL consultation batch. After excluding the
+82 accepted rows from the two smaller artifacts, `review_queue_1000_remaining_after_82.csv`
+contains 918 rows.
+
+`data/rcl_2026_selected_remaining_918_v0_1` processes those 918 rows as a
+separate checkpointed source batch.
+
+Download evidence:
+
+- source rows: 918
+- download failures: 0
+- local raw artifact bytes: 505,118,454
+- unique source URLs: 918
+- unique artifact digests: 910
+- duplicate content digests: 8 duplicate SHA-256 groups
+
+Extraction evidence:
+
+- extraction rows: 918
+- extracted: 774
+- empty text / unsupported / not extractable: 144
+- quality hints: 626 good, 55 usable, 93 poor, 144 not_extractable
+- PII hints: 547 yes, 371 uncertain
+
+Draft review suggestions:
+
+- document types: 912 organization_comment, 6 government_response
+- source types: 717 unknown, 163 ngo, 21 employer_organization,
+  10 professional_body, 6 public_body, 1 religious_organization
+- recommendations: 774 conditional, 144 exclude
+
+The 918-row batch is not human-accepted annotation evidence yet. Its review
+suggestions are triage/draft evidence only.
+
 ## Next Tasks
 
-- Human-accept or correct the 42 draft review suggestions in
-  `data/rcl_remaining_consultations_v0_1/review_pack/review_suggestions.csv`.
+- Review or sample-check the 918 draft suggestions before applying them to
+  `annotations.csv`.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
   reviewed sample.

@@ -31,7 +31,12 @@ def write_csv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build the remaining RCL source queue.")
     parser.add_argument("--queue", default="data/rcl_2026_consultations/review_queue.csv")
-    parser.add_argument("--completed", default="data/rcl_gold_pilot_v0_1/annotations.csv")
+    parser.add_argument(
+        "--completed",
+        action="append",
+        default=[],
+        help="Completed annotations CSV. May be passed more than once.",
+    )
     parser.add_argument(
         "--output",
         default="data/rcl_2026_consultations/review_queue_remaining_after_pilot.csv",
@@ -40,11 +45,13 @@ def main() -> int:
     args = parser.parse_args()
 
     queue_path = Path(args.queue)
-    completed_path = Path(args.completed)
     output_path = Path(args.output)
 
     queue = read_csv(queue_path)
-    completed = read_csv(completed_path)
+    completed_paths = args.completed or ["data/rcl_gold_pilot_v0_1/annotations.csv"]
+    completed = []
+    for completed_path in completed_paths:
+        completed.extend(read_csv(Path(completed_path)))
     completed_urls = {row["document_url"] for row in completed if row.get("document_url")}
     completed_digests = {row["artifact_sha256"] for row in completed if row.get("artifact_sha256")}
 
@@ -59,7 +66,7 @@ def main() -> int:
         "generated_at": utc_now(),
         "inputs": {
             "queue": str(queue_path),
-            "completed": str(completed_path),
+            "completed": [str(Path(path)) for path in completed_paths],
         },
         "outputs": {
             "queue": str(output_path),

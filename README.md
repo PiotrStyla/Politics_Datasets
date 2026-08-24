@@ -74,6 +74,17 @@ Kolejka dokumentow pozostalych po pilocie oraz ich osobny download batch:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_gold_pilot.py --input-dir data\rcl_remaining_consultations_v0_1 --expected-rows 42 --allow-duplicate-digests
 ```
 
+Pelna kolejka 1000 wybranych dokumentow i batch pozostaly po dwoch
+zaakceptowanych artefaktach 40 + 42:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_review_queue.py --output data\rcl_2026_consultations\review_queue_1000.csv --limit 0
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_make_remaining_source_queue.py --queue data\rcl_2026_consultations\review_queue_1000.csv --completed data\rcl_gold_pilot_v0_1\annotations.csv --completed data\rcl_remaining_consultations_v0_1\annotations.csv --output data\rcl_2026_consultations\review_queue_1000_remaining_after_82.csv --actor PiotrSty
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_gold_pilot.py --queue data\rcl_2026_consultations\review_queue_1000_remaining_after_82.csv --output-dir data\rcl_2026_selected_remaining_918_v0_1 --priority 0 --limit 0 --actor PiotrSty
+```
+
 Lokalna ekstrakcja tekstu z dokumentow pilota oraz machine-observations do
 triage:
 
@@ -155,6 +166,8 @@ Skrypt zapisuje dane w `data/rcl/`:
   run i 40 dokumentow do recenzji.
 - `rcl_remaining_consultations_v0_1/` - osobny batch dla pozostalych rekordow z
   kolejki review, bez mieszania z zaakceptowanym pilotem.
+- `rcl_2026_selected_remaining_918_v0_1/` - checkpointowany batch dla 918
+  rekordow pozostalych do pelnej kolejki 1000 po zaakceptowanych 82.
 - `rcl_gold_pilot_v0_1/extracted_text/` - lokalne ekstrakty tekstowe; nie
   publikowac przed legal/PII review.
 - `rcl_gold_pilot_v0_1/machine_observations.csv` - automatyczne wskazowki do
