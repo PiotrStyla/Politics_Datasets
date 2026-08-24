@@ -104,6 +104,16 @@ Zapis do `annotations.csv` wymaga `--commit` i zrodlowego CSV, w ktorym
 `manual_review_status` ma wartosc `accepted`, `reviewed` albo `approved`.
 Drafty oznaczone `needs_human_acceptance` sa pomijane.
 
+Kolejka i review pack dla pozostalych niezaakceptowanych rekordow:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_make_remaining_review_queue.py --actor PiotrSty
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_build_review_pack.py --queue remaining_review_queue.csv --output-dir remaining_review_pack --sheet-name remaining_review_sheet.csv --title "RCL Remaining Review Pack" --description "Local review surface for the 30 unreviewed RCL pilot rows. Raw documents and extracted text are linked locally and should not be published before legal and PII review." --actor PiotrSty
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_draft_calibration_review.py --review-pack-dir remaining_review_pack --sheet-name remaining_review_sheet.csv --output-prefix remaining_review_suggestions --actor Codex-assisted
+```
+
 Instrukcja recenzji znajduje sie w
 `docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
 lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
@@ -137,6 +147,9 @@ Skrypt zapisuje dane w `data/rcl/`:
   przeniesieniem do `annotations.csv`.
 - `rcl_gold_pilot_v0_1/review_pack/calibration_apply_report.json` - raport z
   dry-run lub zapisu zaakceptowanych rekordow do `annotations.csv`.
+- `rcl_gold_pilot_v0_1/remaining_review_queue.csv` i
+  `rcl_gold_pilot_v0_1/remaining_review_pack/` - lokalna paczka review dla
+  30 rekordow, ktore pozostaly po zaakceptowanej kalibracji.
 
 ## Uwagi techniczne
 

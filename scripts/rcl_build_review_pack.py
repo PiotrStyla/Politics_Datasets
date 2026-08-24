@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a local HTML/CSV review pack for RCL calibration annotation."""
+"""Build a local HTML/CSV review pack for RCL pilot annotation."""
 
 from __future__ import annotations
 
@@ -267,7 +267,15 @@ def relative_from_pack(output_dir: Path, target: Path) -> str:
     return Path(os.path.relpath(target.resolve(), output_dir.resolve())).as_posix()
 
 
-def html_document(root: Path, output_dir: Path, rows: list[dict[str, str]], created_at: str) -> str:
+def html_document(
+    root: Path,
+    output_dir: Path,
+    rows: list[dict[str, str]],
+    created_at: str,
+    title: str,
+    description: str,
+    sheet_name: str,
+) -> str:
     reason_counts = {
         reason: sum(1 for row in rows if row["review_reason"] == reason)
         for reason in sorted({row["review_reason"] for row in rows})
@@ -319,20 +327,20 @@ def html_document(root: Path, output_dir: Path, rows: list[dict[str, str]], crea
         f"<div class=\"metric\"><strong>{count}</strong><span>{html.escape(reason)}</span></div>"
         for reason, count in reason_counts.items()
     )
-    metrics += f"<div class=\"metric\"><strong>{len(rows)}</strong><span>calibration rows</span></div>"
+    metrics += f"<div class=\"metric\"><strong>{len(rows)}</strong><span>review rows</span></div>"
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RCL Calibration Review Pack</title>
+  <title>{html.escape(title)}</title>
   <style>{css()}</style>
 </head>
 <body>
   <header>
-    <h1>RCL Calibration Review Pack</h1>
-    <p>Local review surface for the 10-row calibration pass. Raw documents and extracted text are linked locally and should not be published before legal and PII review.</p>
-    <p class="muted">Generated at {html.escape(created_at)}. Fill decisions in <code>calibration_review_sheet.csv</code>, then transfer settled fields into <code>annotations.csv</code>.</p>
+    <h1>{html.escape(title)}</h1>
+    <p>{html.escape(description)}</p>
+    <p class="muted">Generated at {html.escape(created_at)}. Fill decisions in <code>{html.escape(sheet_name)}</code>, then transfer settled fields into <code>annotations.csv</code>.</p>
   </header>
   <main>
     <section class="summary">{metrics}</section>
@@ -365,10 +373,19 @@ def html_document(root: Path, output_dir: Path, rows: list[dict[str, str]], crea
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build a local review pack for RCL calibration rows.")
+    parser = argparse.ArgumentParser(description="Build a local review pack for RCL pilot rows.")
     parser.add_argument("--input-dir", default="data/rcl_gold_pilot_v0_1")
     parser.add_argument("--queue", default="calibration_queue.csv")
     parser.add_argument("--output-dir", default="review_pack")
+    parser.add_argument("--sheet-name", default="calibration_review_sheet.csv")
+    parser.add_argument("--title", default="RCL Calibration Review Pack")
+    parser.add_argument(
+        "--description",
+        default=(
+            "Local review surface for RCL pilot rows. Raw documents and extracted text "
+            "are linked locally and should not be published before legal and PII review."
+        ),
+    )
     parser.add_argument("--actor", default="unassigned")
     args = parser.parse_args()
 
@@ -388,11 +405,11 @@ def main() -> int:
     if missing:
         raise SystemExit("missing review-pack inputs:\n" + "\n".join(missing))
 
-    review_sheet_path = output_dir / "calibration_review_sheet.csv"
+    review_sheet_path = output_dir / args.sheet_name
     write_csv(review_sheet_path, REVIEW_FIELDS, rows)
     index_path = output_dir / "index.html"
     index_path.write_text(
-        html_document(root, output_dir, rows, started_at),
+        html_document(root, output_dir, rows, started_at, args.title, args.description, args.sheet_name),
         encoding="utf-8",
         newline="\n",
     )
@@ -419,9 +436,9 @@ def main() -> int:
             "rows": len(rows),
             "missing_inputs": len(missing),
             "output_files": [
-                "review_pack/index.html",
-                "review_pack/calibration_review_sheet.csv",
-                "review_pack/annotation_protocol.md",
+                f"{args.output_dir}/index.html",
+                f"{args.output_dir}/{args.sheet_name}",
+                f"{args.output_dir}/annotation_protocol.md",
             ],
         },
         "claims": [],

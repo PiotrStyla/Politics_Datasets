@@ -81,6 +81,11 @@ calibration decisions into `annotations.csv`. It skips rows unless
 reviewer metadata. Run it first without `--commit`; use `--commit` only after the
 dry-run report is clean.
 
+After the 10-row calibration subset is accepted, use
+`scripts/rcl_make_remaining_review_queue.py` to create the follow-up queue for
+unreviewed rows. Build a separate `remaining_review_pack/` so calibration
+evidence and remaining-row draft suggestions do not overwrite each other.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.

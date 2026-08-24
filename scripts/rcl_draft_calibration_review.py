@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draft conservative calibration-review suggestions from local RCL review pack data."""
+"""Draft conservative review suggestions from local RCL review pack data."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-PROTOCOL_ID = "rcl-gold-pilot-draft-calibration-review"
+PROTOCOL_ID = "rcl-gold-pilot-draft-review"
 PROTOCOL_VERSION = "0.1.0"
 
 OUTPUT_FIELDS = [
@@ -184,7 +184,7 @@ def write_summary(path: Path, rows: list[dict[str, str]], created_at: str) -> No
         "draft_confidence": Counter(row["draft_confidence"] for row in rows),
     }
     lines = [
-        "# RCL calibration review suggestions",
+        "# RCL review suggestions",
         "",
         f"Generated at: `{created_at}`",
         "",
@@ -206,32 +206,34 @@ def write_summary(path: Path, rows: list[dict[str, str]], created_at: str) -> No
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Draft conservative calibration-review suggestions.")
+    parser = argparse.ArgumentParser(description="Draft conservative RCL review suggestions.")
     parser.add_argument("--input-dir", default="data/rcl_gold_pilot_v0_1")
     parser.add_argument("--review-pack-dir", default="review_pack")
+    parser.add_argument("--sheet-name", default="calibration_review_sheet.csv")
+    parser.add_argument("--output-prefix", default="calibration_review_suggestions")
     parser.add_argument("--actor", default="Codex-assisted")
     args = parser.parse_args()
 
     started_at = utc_now()
-    run_id = "rcl-draft-calibration-" + started_at.replace(":", "").replace("-", "").replace("+", "z")
+    run_id = "rcl-draft-review-" + started_at.replace(":", "").replace("-", "").replace("+", "z")
     root = Path(args.input_dir)
     review_pack = root / args.review_pack_dir
-    input_path = review_pack / "calibration_review_sheet.csv"
+    input_path = review_pack / args.sheet_name
     rows = read_csv(input_path)
     drafted = [draft_row(root, row, args.actor, started_at) for row in rows]
 
-    output_path = review_pack / "calibration_review_suggestions.csv"
-    summary_path = review_pack / "calibration_review_suggestions.md"
+    output_path = review_pack / f"{args.output_prefix}.csv"
+    summary_path = review_pack / f"{args.output_prefix}.md"
     write_csv(output_path, OUTPUT_FIELDS, drafted)
     write_summary(summary_path, drafted, started_at)
 
     run = {
-        "object": {"id": "rcl:gold-set-pilot-draft-calibration-review", "kind": "draft_review_evidence"},
+        "object": {"id": "rcl:gold-set-pilot-draft-review", "kind": "draft_review_evidence"},
         "protocol": {
             "id": PROTOCOL_ID,
             "version": PROTOCOL_VERSION,
             "tool": "scripts/rcl_draft_calibration_review.py",
-            "input": "review_pack/calibration_review_sheet.csv",
+            "input": f"{args.review_pack_dir}/{args.sheet_name}",
         },
         "run": {
             "id": run_id,
@@ -248,8 +250,8 @@ def main() -> int:
         },
         "claims": [],
         "outputs": {
-            "suggestions_csv": "review_pack/calibration_review_suggestions.csv",
-            "suggestions_summary": "review_pack/calibration_review_suggestions.md",
+            "suggestions_csv": f"{args.review_pack_dir}/{args.output_prefix}.csv",
+            "suggestions_summary": f"{args.review_pack_dir}/{args.output_prefix}.md",
         },
     }
     runs_dir = root / "runs"

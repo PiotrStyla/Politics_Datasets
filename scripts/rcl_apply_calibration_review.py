@@ -98,6 +98,12 @@ def reviewer_is_assisted(row: dict[str, str]) -> bool:
     return reviewer in ASSISTED_REVIEWERS or reviewer.startswith("codex")
 
 
+def report_path_for(root: Path, source_path: Path) -> Path:
+    if source_path.parent == root / "review_pack" and source_path.name == "calibration_review_suggestions.csv":
+        return source_path.parent / "calibration_apply_report.json"
+    return source_path.parent / f"{source_path.stem}_apply_report.json"
+
+
 def validate_candidate(row: dict[str, str], allow_assisted_reviewer: bool) -> list[str]:
     errors: list[str] = []
     queue_id = row.get("queue_id", "")
@@ -226,7 +232,7 @@ def main() -> int:
         "warnings": warnings,
         "claims": [],
     }
-    report_path = root / "review_pack" / "calibration_apply_report.json"
+    report_path = report_path_for(root, source_path)
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
     runs_dir = root / "runs"
     runs_dir.mkdir(parents=True, exist_ok=True)

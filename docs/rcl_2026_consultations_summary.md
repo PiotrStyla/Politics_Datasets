@@ -223,10 +223,37 @@ These accepted rows are annotation evidence for the calibration subset. They do
 not establish a training-eligible release because document-level legal review is
 still open.
 
+## Remaining Review Pack v0.1
+
+`scripts/rcl_make_remaining_review_queue.py`,
+`scripts/rcl_build_review_pack.py` and
+`scripts/rcl_draft_calibration_review.py` prepared the remaining unreviewed
+subset:
+
+- Remaining rows: 30.
+- Local HTML index:
+  `data/rcl_gold_pilot_v0_1/remaining_review_pack/index.html`.
+- Editable review sheet:
+  `data/rcl_gold_pilot_v0_1/remaining_review_pack/remaining_review_sheet.csv`.
+- Draft suggestions:
+  `data/rcl_gold_pilot_v0_1/remaining_review_pack/remaining_review_suggestions.csv`.
+- Draft apply report:
+  `data/rcl_gold_pilot_v0_1/remaining_review_pack/remaining_review_suggestions_apply_report.json`.
+- Draft document types: 30 `organization_comment`.
+- Draft PII status: 30 `yes`.
+- Draft extraction quality: 25 `good`, 3 `usable`, 2 `poor`.
+- Draft training recommendation: 30 `conditional`.
+- Apply dry-run: pass, 0 accepted rows, 30 skipped because
+  `manual_review_status=needs_human_acceptance`.
+
+No remaining-row suggestions were copied into `annotations.csv`.
+
 ## Next Tasks
 
-- Continue manual review for the remaining 30 pilot rows in
-  `data/rcl_gold_pilot_v0_1/annotations.csv`.
+- Review or accept/edit the 30 rows in
+  `data/rcl_gold_pilot_v0_1/remaining_review_pack/remaining_review_suggestions.csv`.
+- If accepted, set `manual_review_status=accepted` and reviewer metadata, then
+  run `scripts/rcl_apply_calibration_review.py --source remaining_review_pack/remaining_review_suggestions.csv --commit`.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
