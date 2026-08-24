@@ -75,6 +75,12 @@ must be accepted or edited by a reviewer before they become annotation evidence.
 Legal status remains `review_needed` unless a dedicated legal review is
 completed.
 
+`scripts/rcl_apply_calibration_review.py` is the only supported path for copying
+calibration decisions into `annotations.csv`. It skips rows unless
+`manual_review_status` is `accepted`, `reviewed` or `approved`, and it requires
+reviewer metadata. Run it first without `--commit`; use `--commit` only after the
+dry-run report is clean.
+
 ## Ontology mapping
 
 - The source file is an `Object` with a content-addressed `Version`.

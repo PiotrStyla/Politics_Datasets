@@ -185,6 +185,26 @@ suggestions:
 These rows are not final human annotations and do not create legal/training
 claims. They are a starting point for reviewer calibration.
 
+## Calibration Apply Gate v0.1
+
+`scripts/rcl_apply_calibration_review.py` was added as the controlled path from
+review-pack decisions into `annotations.csv`.
+
+Current dry-run result on 2026-08-24:
+
+- Source rows: 10.
+- Accepted rows: 0.
+- Applied rows: 0.
+- Skipped rows: 10.
+- Skip reason: all draft rows have
+  `manual_review_status=needs_human_acceptance`.
+- `annotations.csv` was not changed.
+
+The script writes `review_pack/calibration_apply_report.json` and requires
+`--commit` for any annotation-table update. It also requires accepted statuses
+(`accepted`, `reviewed` or `approved`) and reviewer metadata before copying
+fields into the main annotation table.
+
 ## Next Tasks
 
 - Complete manual review of the 10 calibration rows in
@@ -195,6 +215,8 @@ claims. They are a starting point for reviewer calibration.
   explicitly accept or edit each suggested value.
 - After calibration, apply settled fields to
   `data/rcl_gold_pilot_v0_1/annotations.csv`.
+- Use `scripts/rcl_apply_calibration_review.py --commit` only after accepted
+  statuses and reviewer metadata are present.
 - Re-run `scripts/rcl_validate_gold_pilot.py` after annotation.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the

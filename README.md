@@ -93,6 +93,17 @@ Konserwatywne draft-sugestie do kalibracyjnego review:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_draft_calibration_review.py --actor Codex-assisted
 ```
 
+Dry-run przeniesienia zaakceptowanych rekordow kalibracyjnych do
+`annotations.csv`:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_apply_calibration_review.py --actor PiotrSty
+```
+
+Zapis do `annotations.csv` wymaga `--commit` i zrodlowego CSV, w ktorym
+`manual_review_status` ma wartosc `accepted`, `reviewed` albo `approved`.
+Drafty oznaczone `needs_human_acceptance` sa pomijane.
+
 Instrukcja recenzji znajduje sie w
 `docs/rcl_gold_set_annotation_protocol.md`. Surowe dokumenty pilota pozostaja
 lokalne do czasu review legal/PII. Wyekstrahowany tekst rowniez pozostaje
@@ -124,6 +135,8 @@ Skrypt zapisuje dane w `data/rcl/`:
 - `rcl_gold_pilot_v0_1/review_pack/calibration_review_suggestions.csv` -
   konserwatywne draft-sugestie; wymagaja akceptacji/edycji recenzenta przed
   przeniesieniem do `annotations.csv`.
+- `rcl_gold_pilot_v0_1/review_pack/calibration_apply_report.json` - raport z
+  dry-run lub zapisu zaakceptowanych rekordow do `annotations.csv`.
 
 ## Uwagi techniczne
 
