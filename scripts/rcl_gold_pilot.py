@@ -58,8 +58,11 @@ def utc_now() -> str:
 
 def read_queue(path: Path, priority: int, limit: int) -> list[dict[str, str]]:
     with path.open(encoding="utf-8", newline="") as handle:
-        rows = [row for row in csv.DictReader(handle) if int(row["priority"]) == priority]
-    rows.sort(key=lambda row: row["queue_id"])
+        if priority <= 0:
+            rows = list(csv.DictReader(handle))
+        else:
+            rows = [row for row in csv.DictReader(handle) if int(row["priority"]) == priority]
+    rows.sort(key=lambda row: (int(row["priority"]), row["queue_id"]))
     return rows[:limit] if limit else rows
 
 
@@ -115,7 +118,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Build the bounded RCL gold-set review pilot.")
     parser.add_argument("--queue", default="data/rcl_2026_consultations/review_queue.csv")
     parser.add_argument("--output-dir", default="data/rcl_gold_pilot_v0_1")
-    parser.add_argument("--priority", type=int, default=1)
+    parser.add_argument("--priority", type=int, default=1, help="Use 0 for every priority in the queue.")
     parser.add_argument("--limit", type=int, default=40, help="Use 0 for every matching row.")
     parser.add_argument("--sleep", type=float, default=0.75)
     parser.add_argument("--timeout", type=int, default=60)

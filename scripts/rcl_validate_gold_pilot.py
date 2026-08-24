@@ -64,6 +64,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Validate an RCL gold-pilot artifact.")
     parser.add_argument("--input-dir", default="data/rcl_gold_pilot_v0_1")
     parser.add_argument("--expected-rows", type=int, default=40)
+    parser.add_argument(
+        "--allow-duplicate-digests",
+        action="store_true",
+        help="Allow different queue rows to point at identical content versions.",
+    )
     args = parser.parse_args()
 
     root = Path(args.input_dir)
@@ -92,12 +97,16 @@ def main() -> int:
     }.items():
         duplicates = duplicate_values(values)
         if duplicates:
-            errors.append(f"duplicate {label}: {duplicates[:5]}")
+            if label == "artifact digest" and args.allow_duplicate_digests:
+                warnings.append(f"duplicate {label}: {duplicates[:5]}")
+            else:
+                errors.append(f"duplicate {label}: {duplicates[:5]}")
 
-    annotation_by_digest = {row["artifact_sha256"]: row for row in annotations}
+    annotation_by_queue_id = {row["queue_id"]: row for row in annotations}
     total_bytes = 0
     media_types: Counter[str] = Counter()
     for item in manifest:
+        queue_id = str(item["object"]["id"]).rsplit(":", 1)[-1]
         version = item["version"]
         digest = str(version["digest"]["value"])
         path = root / str(version["local_path"])
@@ -112,14 +121,16 @@ def main() -> int:
             errors.append(f"byte-count mismatch: {path}")
         total_bytes += actual_bytes
         media_types[str(version["media_type"])] += 1
-        annotation = annotation_by_digest.get(digest)
+        annotation = annotation_by_queue_id.get(queue_id)
         if annotation is None:
-            errors.append(f"manifest digest absent from annotations: {digest}")
+            errors.append(f"manifest queue_id absent from annotations: {queue_id}")
+        elif annotation["artifact_sha256"] != digest:
+            errors.append(f"annotation digest mismatch for queue_id: {queue_id}")
         elif annotation["document_url"] != item["source"]["url"]:
-            errors.append(f"URL mismatch for digest: {digest}")
+            errors.append(f"URL mismatch for queue_id: {queue_id}")
 
     manifest_digest_set = set(digests)
-    extra_annotation_digests = sorted(set(annotation_by_digest) - manifest_digest_set)
+    extra_annotation_digests = sorted({row["artifact_sha256"] for row in annotations} - manifest_digest_set)
     if extra_annotation_digests:
         errors.append(f"annotation digests absent from manifest: {extra_annotation_digests[:5]}")
 
