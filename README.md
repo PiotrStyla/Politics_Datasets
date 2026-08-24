@@ -85,6 +85,12 @@ zaakceptowanych artefaktach 40 + 42:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_gold_pilot.py --queue data\rcl_2026_consultations\review_queue_1000_remaining_after_82.csv --output-dir data\rcl_2026_selected_remaining_918_v0_1 --priority 0 --limit 0 --actor PiotrSty
 ```
 
+Metadata-only handoff do Polish DynaWord:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_prepare_dynaword_handoff.py --actor PiotrSty
+```
+
 Lokalna ekstrakcja tekstu z dokumentow pilota oraz machine-observations do
 triage:
 
@@ -168,6 +174,8 @@ Skrypt zapisuje dane w `data/rcl/`:
   kolejki review, bez mieszania z zaakceptowanym pilotem.
 - `rcl_2026_selected_remaining_918_v0_1/` - checkpointowany batch dla 918
   rekordow pozostalych do pelnej kolejki 1000 po zaakceptowanych 82.
+- `rcl_dynaword_handoff_v0_1/` - metadata-only adapter/handoff do Polish
+  DynaWord; bez pola `text`, bez raw payloadow i bez claimu training-ready.
 - `rcl_gold_pilot_v0_1/extracted_text/` - lokalne ekstrakty tekstowe; nie
   publikowac przed legal/PII review.
 - `rcl_gold_pilot_v0_1/machine_observations.csv` - automatyczne wskazowki do
