@@ -368,14 +368,83 @@ Draft review suggestions:
 The 918-row batch is not human-accepted annotation evidence yet. Its review
 suggestions are triage/draft evidence only.
 
+## 2025 Consultation Source Batch v0.1
+
+The 2025 source batch expands the same `typeId=2` project-of-law protocol to
+the complete 2025 date slice in the local RCL inventory. The crawler was
+upgraded with atomic checkpoints, `--resume` and bounded project concurrency
+before this larger run.
+
+Metadata crawl evidence:
+
+- projects discovered and processed: 315 of 315
+- projects with a public-consultation catalog: 250
+- documents found in consultation catalogs: 5,556
+- documents selected by the `stanowisk` / `uwag` filter: 4,166
+- unique selected source URLs: 4,166
+- crawl errors: 0
+- raw project and consultation HTML retained locally for provenance
+
+The deterministic queue is stored at
+`data/rcl_2025_consultations/review_queue_all_selected.csv`:
+
+- priority 1 (`Stanowiska...`): 3,882
+- priority 2 (other filename/category matches): 284
+- no duplicate source URLs
+
+`data/rcl_2025_selected_v0_1` is the local source artifact produced from that
+queue. The queue downloader was upgraded to resume from existing manifests and
+raw files, use bounded worker concurrency, write atomic batch checkpoints and
+defer the full checksum pass until the final stage.
+
+Download and validation evidence:
+
+- source rows and local artifacts: 4,166
+- download failures: 0
+- local raw artifact bytes: 2,636,128,122
+- unique source URLs and queue IDs: 4,166
+- unique artifact SHA-256 digests: 4,042
+- repeated-content rows beyond unique digests: 124
+- media types: 3,150 PDF, 807 DOCX, 98 text/plain, 42 DOC, 34 XLSX,
+  18 ZIP, 6 RTF, 4 ODT, 3 PNG, 2 JPEG and 2 XML
+- validator status: pass
+- manifest SHA-256:
+  `9ada1dc79d833471661994eec7c4fdf306df3367902320c6f0dc8ea663ad367d`
+
+This is complete source-ingestion evidence for the selected 2025 queue, not a
+training-ready release. All 4,166 rows remain unreviewed; extracted text, PII
+screening, legal review and training-candidate decisions are separate protocol
+stages.
+
+Text extraction evidence:
+
+- source, extraction-manifest and machine-observation rows: 4,166 each
+- extracted text: 3,323 rows
+- empty or unsupported text: 843 rows
+- local UTF-8 text bytes: 101,716,583
+- quality hints: 2,472 good, 375 usable, 476 poor and 843 not extractable
+- machine PII hints: 2,434 yes and 1,732 uncertain
+- extraction validator status: pass
+- extraction manifest SHA-256:
+  `9267655a487fb1093ad82079d380756d4041e2446fb2e20fc405d7c4453af129`
+
+The extraction protocol now writes atomic batch checkpoints, preserves prior
+page-count and warning evidence when resuming from cached text, and supports
+bounded worker concurrency while assembling output manifests in source order.
+The 843 empty/unsupported rows require format-specific extraction or OCR; the
+machine PII and quality fields remain triage observations rather than reviewed
+claims.
+
 ## Next Tasks
 
+- Separate substantive comments from `brak uwag`, cover letters, reports and
+  government responses before review sampling.
+- Add format-specific extraction for DOC, RTF, ODT, XLSX, MSG and ZIP, followed
+  by OCR for image-only PDFs.
 - Review or sample-check the 918 draft suggestions before applying them to
   `annotations.csv`.
 - Re-run `scripts/rcl_validate_extraction.py` after any extraction changes.
 - Summarize annotation evidence and formulate only claims supported by the
   reviewed sample.
-- Add checkpoint/resume writes to `scripts/rcl_downloader.py` before larger
-  source batches.
 - Normalize document file extensions and preserve original filenames for later
   extraction runs.

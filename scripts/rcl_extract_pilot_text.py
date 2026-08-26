@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import hashlib
 import json
@@ -16,7 +17,7 @@ from xml.etree import ElementTree
 
 
 PROTOCOL_ID = "rcl-gold-pilot-text-extraction"
-PROTOCOL_VERSION = "0.1.0"
+PROTOCOL_VERSION = "0.2.0"
 
 OBSERVATION_FIELDS = [
     "queue_id",
@@ -78,9 +79,20 @@ def read_jsonl(path: Path) -> list[dict[str, object]]:
 
 
 def write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    with temporary_path.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+    temporary_path.replace(path)
+
+
+def write_observations(path: Path, rows: list[dict[str, str]]) -> None:
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    with temporary_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=OBSERVATION_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+    temporary_path.replace(path)
 
 
 def normalize_text(parts: list[str]) -> str:
@@ -238,12 +250,79 @@ def extract_one(path: Path, media_type: str) -> tuple[str, str, int, list[str]]:
     return "", "unsupported", 0, [f"unsupported media type: {media_type}"]
 
 
+def extract_manifest_item(
+    item: dict[str, object],
+    root: Path,
+    text_dir: Path,
+    overwrite: bool,
+    prior_evidence: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    version = item["version"]
+    object_id = str(item["object"]["id"])
+    queue_id = object_id.rsplit(":", 1)[-1]
+    raw_path = root / str(version["local_path"])
+    media_type = str(version["media_type"])
+    raw_sha256 = str(version["digest"]["value"])
+    text_path = text_dir / f"{queue_id}.txt"
+
+    warnings: list[str] = []
+    status = "extracted"
+    extractor = ""
+    page_count = 0
+    if text_path.is_file() and not overwrite:
+        text = text_path.read_text(encoding="utf-8", errors="replace")
+        evidence = prior_evidence.get(queue_id, {})
+        status = str(evidence.get("extract_status", "extracted" if text.strip() else "empty_text"))
+        extractor = str(evidence.get("extractor", "existing"))
+        page_count = int(evidence.get("page_or_section_count", 0) or 0)
+        warnings = [str(value) for value in evidence.get("warnings", [])]
+    else:
+        if not raw_path.is_file():
+            text = ""
+            status = "missing_raw"
+            extractor = "missing_raw"
+            warnings.append(f"missing raw file: {raw_path}")
+        elif sha256_file(raw_path) != raw_sha256:
+            text = ""
+            status = "raw_digest_mismatch"
+            extractor = "not_run"
+            warnings.append("raw file digest does not match source manifest")
+        else:
+            text, extractor, page_count, warnings = extract_one(raw_path, media_type)
+            if not text.strip():
+                status = "empty_text"
+            temporary_path = text_path.with_suffix(".txt.tmp")
+            temporary_path.write_text(text, encoding="utf-8", newline="\n")
+            temporary_path.replace(text_path)
+
+    return {
+        "item": item,
+        "object_id": object_id,
+        "queue_id": queue_id,
+        "raw_path": raw_path,
+        "media_type": media_type,
+        "raw_sha256": raw_sha256,
+        "text_path": text_path,
+        "text": text,
+        "warnings": warnings,
+        "status": status,
+        "extractor": extractor,
+        "page_count": page_count,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract text for the RCL gold-pilot local review set.")
     parser.add_argument("--input-dir", default="data/rcl_gold_pilot_v0_1")
     parser.add_argument("--actor", default="unassigned")
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--checkpoint-every", type=int, default=25)
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
+    if args.checkpoint_every < 1:
+        parser.error("--checkpoint-every must be at least 1")
+    if args.workers < 1:
+        parser.error("--workers must be at least 1")
 
     started_at = utc_now()
     run_id = "rcl-extract-pilot-" + started_at.replace(":", "").replace("-", "").replace("+", "z")
@@ -255,45 +334,45 @@ def main() -> int:
     runs_dir.mkdir(parents=True, exist_ok=True)
 
     source_manifest = read_jsonl(manifest_path)
+    extraction_manifest_path = root / "extraction_manifest.jsonl"
+    observations_path = root / "machine_observations.csv"
+    prior_evidence: dict[str, dict[str, object]] = {}
+    if extraction_manifest_path.exists() and not args.overwrite:
+        for entry in read_jsonl(extraction_manifest_path):
+            queue_id = str(entry["object"]["id"]).rsplit(":", 1)[-1]
+            prior_evidence[queue_id] = dict(entry.get("run_evidence", {}))
     extraction_manifest: list[dict[str, object]] = []
     observations: list[dict[str, str]] = []
     counters: Counter[str] = Counter()
 
-    for index, item in enumerate(source_manifest, start=1):
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=args.workers)
+    payloads = executor.map(
+        lambda item: extract_manifest_item(
+            item,
+            root,
+            text_dir,
+            args.overwrite,
+            prior_evidence,
+        ),
+        source_manifest,
+    )
+    for index, payload in enumerate(payloads, start=1):
+        item = payload["item"]
         version = item["version"]
         source = item["source"]
-        object_id = str(item["object"]["id"])
-        queue_id = object_id.rsplit(":", 1)[-1]
-        raw_path = root / str(version["local_path"])
-        media_type = str(version["media_type"])
-        raw_sha256 = str(version["digest"]["value"])
-        text_path = text_dir / f"{queue_id}.txt"
+        object_id = str(payload["object_id"])
+        queue_id = str(payload["queue_id"])
+        raw_path = payload["raw_path"]
+        media_type = str(payload["media_type"])
+        raw_sha256 = str(payload["raw_sha256"])
+        text_path = payload["text_path"]
+        text = str(payload["text"])
+        warnings = payload["warnings"]
+        status = str(payload["status"])
+        extractor = str(payload["extractor"])
+        page_count = int(payload["page_count"])
 
         print(f"{index}/{len(source_manifest)} {queue_id}: {raw_path.name}")
-        warnings: list[str] = []
-        status = "extracted"
-        extractor = ""
-        page_count = 0
-        if text_path.is_file() and not args.overwrite:
-            text = text_path.read_text(encoding="utf-8", errors="replace")
-            extractor = "existing"
-        else:
-            if not raw_path.is_file():
-                text = ""
-                status = "missing_raw"
-                extractor = "missing_raw"
-                warnings.append(f"missing raw file: {raw_path}")
-            elif sha256_file(raw_path) != raw_sha256:
-                text = ""
-                status = "raw_digest_mismatch"
-                extractor = "not_run"
-                warnings.append("raw file digest does not match source manifest")
-            else:
-                text, extractor, page_count, warnings = extract_one(raw_path, media_type)
-                if not text.strip():
-                    status = "empty_text"
-                text_path.write_text(text, encoding="utf-8", newline="\n")
-
         text_raw = text.encode("utf-8")
         text_sha256 = sha256_bytes(text_raw)
         char_count = len(text)
@@ -383,13 +462,13 @@ def main() -> int:
             }
         )
 
-    extraction_manifest_path = root / "extraction_manifest.jsonl"
-    observations_path = root / "machine_observations.csv"
+        if index % args.checkpoint_every == 0:
+            write_jsonl(extraction_manifest_path, extraction_manifest)
+            write_observations(observations_path, observations)
+
+    executor.shutdown(wait=True)
     write_jsonl(extraction_manifest_path, extraction_manifest)
-    with observations_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=OBSERVATION_FIELDS)
-        writer.writeheader()
-        writer.writerows(observations)
+    write_observations(observations_path, observations)
 
     finished_at = utc_now()
     run = {

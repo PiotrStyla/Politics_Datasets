@@ -85,6 +85,23 @@ zaakceptowanych artefaktach 40 + 42:
 & "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_gold_pilot.py --queue data\rcl_2026_consultations\review_queue_1000_remaining_after_82.csv --output-dir data\rcl_2026_selected_remaining_918_v0_1 --priority 0 --limit 0 --actor PiotrSty
 ```
 
+Pelny metadata crawl projektow ustaw z 2025 roku, kolejka wybranych dokumentow
+i wznawialny download:
+
+```powershell
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_downloader.py --output-dir data\rcl_2025_consultations --type-id 2 --create-from 2025-01-01 --create-to 2025-12-31 --max-pages 0 --no-download --save-html --resume --checkpoint-every 20 --workers 4
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_review_queue.py --projects-csv data\rcl_2025_consultations\projects.csv --documents-csv data\rcl_2025_consultations\documents.csv --output data\rcl_2025_consultations\review_queue_all_selected.csv --limit 0
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_gold_pilot.py --queue data\rcl_2025_consultations\review_queue_all_selected.csv --output-dir data\rcl_2025_selected_v0_1 --priority 0 --limit 0 --workers 8 --checkpoint-every 50 --actor PiotrSty
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_gold_pilot.py --input-dir data\rcl_2025_selected_v0_1 --expected-rows 4166 --allow-duplicate-digests
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_extract_pilot_text.py --input-dir data\rcl_2025_selected_v0_1 --actor PiotrSty --checkpoint-every 50 --workers 4
+
+& "C:\Users\Hipek\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\rcl_validate_extraction.py --input-dir data\rcl_2025_selected_v0_1 --expected-rows 4166
+```
+
 Metadata-only handoff do Polish DynaWord:
 
 ```powershell

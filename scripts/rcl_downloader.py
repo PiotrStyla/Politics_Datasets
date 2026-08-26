@@ -11,6 +11,7 @@ optionally downloads matching PDFs.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import csv
 import hashlib
 import html
@@ -301,21 +302,128 @@ def download_document(doc: Document, output_dir: Path, args: argparse.Namespace)
 
 def write_csv(path: Path, rows: list[dict[str, object]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    with temporary_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
+    temporary_path.replace(path)
 
 
 def append_jsonl(path: Path, rows: Iterable[dict[str, object]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+    with temporary_path.open("w", encoding="utf-8") as handle:
         for row in rows:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+    temporary_path.replace(path)
 
 
 def dataclass_dict(obj: object) -> dict[str, object]:
     return dict(vars(obj))
+
+
+def write_outputs(output_dir: Path, projects: list[Project], documents: list[Document]) -> None:
+    project_fields = list(vars(Project("", "", "")).keys())
+    document_fields = list(vars(Document("", "", "", "", "", "", "")).keys())
+    write_csv(output_dir / "projects.csv", [dataclass_dict(p) for p in projects], project_fields)
+    write_csv(output_dir / "documents.csv", [dataclass_dict(d) for d in documents], document_fields)
+    append_jsonl(output_dir / "projects.jsonl", (dataclass_dict(p) for p in projects))
+    append_jsonl(output_dir / "documents.jsonl", (dataclass_dict(d) for d in documents))
+
+
+def write_checkpoint(
+    output_dir: Path,
+    projects: list[Project],
+    documents: list[Document],
+    processed_project_ids: set[str],
+    complete: bool,
+) -> None:
+    write_outputs(output_dir, projects, documents)
+    state = {
+        "version": "0.1",
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "complete": complete,
+        "projects_discovered": len(projects),
+        "projects_processed": len(processed_project_ids),
+        "documents_found": len(documents),
+        "processed_project_ids": sorted(processed_project_ids),
+    }
+    checkpoint_path = output_dir / "checkpoint.json"
+    temporary_path = checkpoint_path.with_suffix(".json.tmp")
+    temporary_path.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+    temporary_path.replace(checkpoint_path)
+
+
+def load_resume_state(output_dir: Path) -> tuple[dict[str, Project], list[Document], set[str]]:
+    checkpoint_path = output_dir / "checkpoint.json"
+    projects_path = output_dir / "projects.csv"
+    documents_path = output_dir / "documents.csv"
+    if not checkpoint_path.exists() or not projects_path.exists() or not documents_path.exists():
+        return {}, [], set()
+
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+    with projects_path.open(newline="", encoding="utf-8") as handle:
+        prior_projects = {row["project_id"]: Project(**row) for row in csv.DictReader(handle)}
+
+    documents: list[Document] = []
+    with documents_path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            row["bytes"] = int(row["bytes"] or 0)
+            row["downloaded"] = row["downloaded"].lower() == "true"
+            row["selected"] = row["selected"].lower() == "true"
+            documents.append(Document(**row))
+
+    processed_project_ids = set(checkpoint.get("processed_project_ids", []))
+    return prior_projects, documents, processed_project_ids
+
+
+def process_project(
+    project: Project,
+    args: argparse.Namespace,
+    output_dir: Path,
+    raw_dir: Path,
+) -> tuple[list[Document], bool]:
+    documents: list[Document] = []
+    try:
+        project_html = fetch_text(project.project_url, args)
+        if args.save_html:
+            (raw_dir / f"project_{project.project_id}.html").write_text(project_html, encoding="utf-8")
+        project.consultation_url = find_consultation_url(project, project_html)
+        if project.consultation_url:
+            time.sleep(args.sleep)
+            consultation_html = fetch_text(project.consultation_url, args)
+            if args.save_html:
+                (raw_dir / f"consultations_{project.project_id}.html").write_text(
+                    consultation_html,
+                    encoding="utf-8",
+                )
+            for doc in parse_documents(project, consultation_html):
+                doc.selected = document_matches(doc, args.category_keyword, args.all_consultation_docs)
+                if doc.selected and not args.no_download:
+                    try:
+                        download_document(doc, output_dir, args)
+                    except Exception as exc:  # keep crawling after one bad file
+                        doc.error = str(exc)
+                documents.append(doc)
+            time.sleep(args.sleep)
+        return documents, True
+    except Exception as exc:
+        return [
+            Document(
+                project_id=project.project_id,
+                project_title=project.title,
+                project_number=project.number,
+                category_id="",
+                category="",
+                filename="",
+                document_url="",
+                error=str(exc),
+            )
+        ], False
 
 
 def crawl(args: argparse.Namespace) -> tuple[list[Project], list[Document]]:
@@ -359,44 +467,53 @@ def crawl(args: argparse.Namespace) -> tuple[list[Project], list[Document]]:
     if args.list_only:
         return projects, []
 
+    prior_projects: dict[str, Project] = {}
     documents: list[Document] = []
-    for idx, project in enumerate(projects, start=1):
-        print(f"project {idx}/{len(projects)}: {project.project_id} {project.number}", file=sys.stderr)
-        try:
-            project_html = fetch_text(project.project_url, args)
-            if args.save_html:
-                (raw_dir / f"project_{project.project_id}.html").write_text(project_html, encoding="utf-8")
-            project.consultation_url = find_consultation_url(project, project_html)
-            if not project.consultation_url:
-                continue
-            time.sleep(args.sleep)
-            consultation_html = fetch_text(project.consultation_url, args)
-            if args.save_html:
-                (raw_dir / f"consultations_{project.project_id}.html").write_text(consultation_html, encoding="utf-8")
-            project_docs = parse_documents(project, consultation_html)
-            for doc in project_docs:
-                doc.selected = document_matches(doc, args.category_keyword, args.all_consultation_docs)
-                if doc.selected:
-                    if not args.no_download:
-                        try:
-                            download_document(doc, output_dir, args)
-                        except Exception as exc:  # keep crawling after one bad file
-                            doc.error = str(exc)
-                documents.append(doc)
-            time.sleep(args.sleep)
-        except Exception as exc:
-            documents.append(
-                Document(
-                    project_id=project.project_id,
-                    project_title=project.title,
-                    project_number=project.number,
-                    category_id="",
-                    category="",
-                    filename="",
-                    document_url="",
-                    error=str(exc),
-                )
-            )
+    processed_project_ids: set[str] = set()
+    if args.resume:
+        prior_projects, documents, processed_project_ids = load_resume_state(output_dir)
+        for project in projects:
+            prior = prior_projects.get(project.project_id)
+            if prior is not None:
+                project.consultation_url = prior.consultation_url
+        print(
+            f"resume: {len(processed_project_ids)} projects, {len(documents)} documents",
+            file=sys.stderr,
+        )
+
+    pending = [
+        (idx, project)
+        for idx, project in enumerate(projects, start=1)
+        if project.project_id not in processed_project_ids
+    ]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+        results = executor.map(
+            lambda item: process_project(item[1], args, output_dir, raw_dir),
+            pending,
+        )
+        for handled, ((idx, project), (project_documents, project_completed)) in enumerate(
+            zip(pending, results),
+            start=1,
+        ):
+            print(f"project {idx}/{len(projects)}: {project.project_id} {project.number}", file=sys.stderr)
+            documents = [
+                doc
+                for doc in documents
+                if not (doc.project_id == project.project_id and doc.error and not doc.document_url)
+            ]
+            documents.extend(project_documents)
+            if project_completed:
+                processed_project_ids.add(project.project_id)
+            if args.checkpoint_every and handled % args.checkpoint_every == 0:
+                write_checkpoint(output_dir, projects, documents, processed_project_ids, complete=False)
+
+    write_checkpoint(
+        output_dir,
+        projects,
+        documents,
+        processed_project_ids,
+        complete=len(processed_project_ids) == len(projects),
+    )
 
     return projects, documents
 
@@ -416,6 +533,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-download", action="store_true", help="Only write metadata, do not download PDFs.")
     parser.add_argument("--save-html", action="store_true", help="Save raw list/project/catalog HTML for auditability.")
     parser.add_argument("--overwrite", action="store_true", help="Re-download PDFs even if a local file exists.")
+    parser.add_argument("--resume", action="store_true", help="Resume a checkpointed crawl in the output directory.")
+    parser.add_argument("--checkpoint-every", type=int, default=25, help="Write a resumable checkpoint every N projects. Use 0 to disable intermediate checkpoints.")
+    parser.add_argument("--workers", type=int, default=1, help="Concurrent project workers. Keep low to avoid overloading the source service.")
     parser.add_argument("--sleep", type=float, default=0.5, help="Delay between requests in seconds.")
     parser.add_argument("--timeout", type=int, default=45, help="HTTP timeout in seconds.")
     parser.add_argument("--retries", type=int, default=2, help="HTTP retry count.")
@@ -443,7 +563,7 @@ def write_run_summary(
         "protocol": {
             "kind": "source_crawl",
             "tool": "scripts/rcl_downloader.py",
-            "version": "0.2",
+            "version": "0.3",
         },
         "run": {
             "started_at": started_at,
@@ -482,16 +602,13 @@ def main() -> int:
         args.max_pages = None
     if args.max_projects == 0:
         args.max_projects = None
+    if args.workers < 1:
+        parser.error("--workers must be at least 1")
 
     output_dir = Path(args.output_dir)
     projects, documents = crawl(args)
 
-    project_fields = list(vars(Project("", "", "")).keys())
-    document_fields = list(vars(Document("", "", "", "", "", "", "")).keys())
-    write_csv(output_dir / "projects.csv", [dataclass_dict(p) for p in projects], project_fields)
-    write_csv(output_dir / "documents.csv", [dataclass_dict(d) for d in documents], document_fields)
-    append_jsonl(output_dir / "projects.jsonl", (dataclass_dict(p) for p in projects))
-    append_jsonl(output_dir / "documents.jsonl", (dataclass_dict(d) for d in documents))
+    write_outputs(output_dir, projects, documents)
     finished_at = datetime.now(timezone.utc).isoformat()
     write_run_summary(output_dir, args, projects, documents, started_at, finished_at)
 
