@@ -81,6 +81,39 @@
       "removed_documents": 0
     }
   },
+  "processing": {
+    "local_artifact": "data/rcl_2026_delta_20260826_v0_1",
+    "selected_source_rows": 8,
+    "downloaded_rows": 8,
+    "download_failures": 0,
+    "source_manifest_sha256": "b7318897ea61b868776c01cda8b8c94b2fa36b692b45a02e5dbe00b61ebc220a",
+    "unique_artifact_digests": 7,
+    "duplicate_content_digests": 1,
+    "extracted_rows": 6,
+    "empty_or_unsupported_rows": 2,
+    "extracted_text_bytes": 659801,
+    "quality_hints": {
+      "good": 5,
+      "poor": 1,
+      "not_extractable": 2
+    },
+    "pii_hints": {
+      "yes": 3,
+      "uncertain": 5
+    },
+    "completed_manual_reviews": 0
+  },
+  "publication": {
+    "repository": "PiotrSty/rcl-legislacja-consultations",
+    "repository_type": "dataset",
+    "private": true,
+    "mode": "metadata-only",
+    "commit": "5a538f0f55933e846284680370752b9765144848",
+    "tag": "v0.3.0-rcl-2026-08-26-metadata-delta",
+    "delta_files": 46,
+    "raw_documents": 0,
+    "extracted_text_files": 0
+  },
   "probe_digests": {
     "2026_projects_csv_sha256": "6ef41ab05c7603a7f9ea1eefc3c74996b5002a24d68c04cc129ef3bec8b6160d",
     "2026_refreshed_documents_csv_sha256": "d4f53392d6f790bcb7676d3e287528c33495b18067ff3b54a80119d05ac73c03",
