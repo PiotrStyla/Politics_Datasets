@@ -435,6 +435,15 @@ The 843 empty/unsupported rows require format-specific extraction or OCR; the
 machine PII and quality fields remain triage observations rather than reviewed
 claims.
 
+HF metadata-only publication evidence:
+
+- private dataset: `PiotrSty/rcl-legislacja-consultations`
+- HF commit: `15c8e08f3d5cbc8b7c31a33b91f983aa6a1fc8bf`
+- immutable tag: `v0.2.0-rcl-2025-metadata-only`
+- remote 2025 files: 587
+- remote verification: source manifest, extraction manifest and machine
+  observations present; no `raw_documents/` or `extracted_text/` payloads
+
 ## Next Tasks
 
 - Separate substantive comments from `brak uwag`, cover letters, reports and
