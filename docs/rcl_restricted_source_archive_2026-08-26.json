@@ -1,0 +1,50 @@
+{
+  "artifact_type": "evidence/hf-restricted-source-archive",
+  "observed_at": "2026-08-26",
+  "repository": "PiotrSty/rcl-legislacja-consultations",
+  "repository_type": "dataset",
+  "private": true,
+  "publication": {
+    "commit": "d9646f04d15b29b9b9d45896804f6240eaad7cb6",
+    "tag": "v0.4.0-rcl-restricted-source-archive",
+    "repository_files": 11374
+  },
+  "payload": {
+    "source_rows": 5174,
+    "raw_document_files": 5174,
+    "extracted_text_files": 5174,
+    "total_files": 10348,
+    "raw_document_bytes": 3163678438,
+    "extracted_text_bytes": 122986358,
+    "total_bytes": 3286664796,
+    "artifacts": [
+      "rcl_gold_pilot_v0_1",
+      "rcl_remaining_consultations_v0_1",
+      "rcl_2026_selected_remaining_918_v0_1",
+      "rcl_2025_selected_v0_1",
+      "rcl_2026_delta_20260826_v0_1"
+    ]
+  },
+  "remote_verification": {
+    "expected_files": 10348,
+    "missing_files": 0,
+    "size_mismatches": 0,
+    "hash_mismatches": 0,
+    "lfs_sha256_checks": 3848,
+    "git_blob_sha1_checks": 6500,
+    "noncanonical_backslash_paths": 0
+  },
+  "upload_correction_evidence": {
+    "issue": "The first RCL 2025 upload used literal Windows backslashes in two remote directory names.",
+    "correction": "The payload was placed under canonical forward-slash paths. A cleanup operation normalized its patterns more broadly than expected, so the canonical 2025 paths were restored from the intact local source and fully reverified.",
+    "data_loss": false,
+    "final_status": "pass"
+  },
+  "local_cleanup": {
+    "status": "pending_explicit_user_approval",
+    "candidate_files": 10348,
+    "candidate_bytes": 3286664796,
+    "scope": "Only raw_documents and extracted_text directories listed in the payload artifacts. Manifests, checksums, reports, annotations and run evidence must remain local."
+  },
+  "interpretation_boundary": "The private restricted archive is a storage and provenance artifact. It does not establish open licensing, PII clearance, quality approval, unrestricted redistribution rights, or training eligibility."
+}
