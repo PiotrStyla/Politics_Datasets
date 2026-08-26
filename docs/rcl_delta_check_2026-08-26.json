@@ -1,0 +1,91 @@
+{
+  "artifact_type": "evidence/rcl-delta-check",
+  "version": "2026-08-26T10:11:37.856Z",
+  "source": "https://legislacja.gov.pl",
+  "scope": {
+    "type_id": 2,
+    "created_slices": [
+      "2025-01-01/2025-12-31",
+      "2026-01-01/2026-08-26"
+    ],
+    "payload_downloaded": false
+  },
+  "protocol": {
+    "list_comparison_key": "project_id",
+    "project_change_fields": [
+      "title",
+      "applicant",
+      "number",
+      "number_url",
+      "created",
+      "modified",
+      "project_url"
+    ],
+    "document_comparison_key": "document_url",
+    "catalog_refresh_rule": "new projects or changed modified field"
+  },
+  "baselines": {
+    "2025": "data/rcl_2025_consultations",
+    "2026": "data/rcl_2026_consultations"
+  },
+  "observations": {
+    "2026": {
+      "baseline_projects": 150,
+      "current_projects": 151,
+      "added_projects": [
+        {
+          "project_id": "12413900",
+          "number": "UD383",
+          "created": "26-08-2026"
+        }
+      ],
+      "removed_projects": 0,
+      "modified_existing_projects": 14,
+      "refreshed_catalogs": 15,
+      "baseline_documents_in_refreshed_catalogs": 241,
+      "current_documents_in_refreshed_catalogs": 257,
+      "added_documents": 16,
+      "removed_documents": 0,
+      "added_documents_matching_selection_rule": 8,
+      "document_delta_by_project": [
+        {
+          "project_id": "12409656",
+          "number": "UD 247",
+          "added_documents": 3,
+          "added_documents_matching_selection_rule": 3
+        },
+        {
+          "project_id": "12413254",
+          "number": "UC160",
+          "added_documents": 1,
+          "added_documents_matching_selection_rule": 0
+        },
+        {
+          "project_id": "12413900",
+          "number": "UD383",
+          "added_documents": 12,
+          "added_documents_matching_selection_rule": 5
+        }
+      ]
+    },
+    "2025": {
+      "baseline_projects": 315,
+      "current_projects": 315,
+      "added_projects": 0,
+      "removed_projects": 0,
+      "modified_existing_projects": 2,
+      "refreshed_catalogs": 2,
+      "baseline_documents_in_refreshed_catalogs": 46,
+      "current_documents_in_refreshed_catalogs": 46,
+      "added_documents": 0,
+      "removed_documents": 0
+    }
+  },
+  "probe_digests": {
+    "2026_projects_csv_sha256": "6ef41ab05c7603a7f9ea1eefc3c74996b5002a24d68c04cc129ef3bec8b6160d",
+    "2026_refreshed_documents_csv_sha256": "d4f53392d6f790bcb7676d3e287528c33495b18067ff3b54a80119d05ac73c03",
+    "2025_projects_csv_sha256": "466043abbf28f608c96b4346d443bff7445358e03e30904098de78fd9c8170e0",
+    "2025_refreshed_documents_csv_sha256": "34f1c7d122f1ec930322f0f3d5bd26872b27702da22e13d06abddc50806520fd"
+  },
+  "interpretation_boundary": "These are source-change observations. They do not establish legal, PII, quality, or training eligibility status."
+}

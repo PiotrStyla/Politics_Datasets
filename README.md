@@ -4,6 +4,8 @@ Roboczy kontekst metodologiczny dla szerszego projektu Polish Dynaword:
 [docs/polish_dynaword_research_frame.md](docs/polish_dynaword_research_frame.md).
 Notatka dla legal review RCL:
 [docs/rcl_legal_review_note.md](docs/rcl_legal_review_note.md).
+Najnowsza kontrola przyrostu danych RCL:
+[docs/rcl_delta_check_2026-08-26.json](docs/rcl_delta_check_2026-08-26.json).
 
 Ten katalog zawiera narzedzia do pobierania publicznych danych z
 `legislacja.gov.pl`, ze szczegolnym naciskiem na:
