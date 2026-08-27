@@ -9,6 +9,7 @@
     "repository": "PiotrSty/rcl-legislacja-consultations",
     "private": true,
     "commit": "958fb2ee382d217026ec48c0eee8de910c72076d",
+    "tag": "v0.5.0-rcl-private-search-index",
     "path": "search_index/v0.1.0/rcl_search_index.parquet",
     "sha256": "3436b86eb5cfaeb990c3879b891d0b8d5072c8f8afa132b8b543460a90a6449b",
     "bytes": 27750220
