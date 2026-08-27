@@ -217,6 +217,21 @@ Skrypt zapisuje dane w `data/rcl/`:
   review: dokumentowe provenance, working premise, PII flags i puste pola
   decyzyjne dla prawnika.
 
+## Prywatny indeks wyszukiwawczy
+
+Kompaktowy indeks dla prywatnej aplikacji `Politics` powstaje ze wszystkich
+wersjonowanych batchy RCL bez pobierania surowych PDF/DOC:
+
+```powershell
+& ".\Politics\.venv\Scripts\python.exe" scripts\rcl_build_search_index.py
+```
+
+Builder pobiera z przypiętej rewizji HF wyłącznie manifesty, annotations i
+`extracted_text`, a następnie zapisuje Parquet, raport evidence i opis runu w
+`data/rcl_search_index_v0_1/`. Opcja `--upload` publikuje te trzy pochodne
+artefakty pod `search_index/v0.1.0/` w prywatnym repo HF. Indeks zachowuje
+statusy legal/PII i nie zmienia ich interpretacji.
+
 ## Uwagi techniczne
 
 Crawler korzysta tylko ze standardowej biblioteki Pythona. Strona RCL jest

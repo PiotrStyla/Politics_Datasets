@@ -1,0 +1,34 @@
+{
+  "artifact_type": "evidence/rcl-private-search-index-publication",
+  "observed_at": "2026-08-27",
+  "source": {
+    "repository": "PiotrSty/rcl-legislacja-consultations",
+    "revision": "d9646f04d15b29b9b9d45896804f6240eaad7cb6"
+  },
+  "publication": {
+    "repository": "PiotrSty/rcl-legislacja-consultations",
+    "private": true,
+    "commit": "958fb2ee382d217026ec48c0eee8de910c72076d",
+    "path": "search_index/v0.1.0/rcl_search_index.parquet",
+    "sha256": "3436b86eb5cfaeb990c3879b891d0b8d5072c8f8afa132b8b543460a90a6449b",
+    "bytes": 27750220
+  },
+  "validation": {
+    "rows": 5174,
+    "unique_ids": 5174,
+    "rows_with_text": 4182,
+    "empty_text_rows": 992,
+    "total_chars": 117380596,
+    "total_words": 15701401,
+    "all_ids_unique": true,
+    "all_rows_have_source_url": true,
+    "all_rows_have_source_digest": true,
+    "text_presence_matches_extract_status": true
+  },
+  "consumer": {
+    "repository": "PiotrStyla/Politics",
+    "config_revision": "958fb2ee382d217026ec48c0eee8de910c72076d",
+    "index_file": "search_index/v0.1.0/rcl_search_index.parquet"
+  },
+  "interpretation_boundary": "The private search index preserves source legal, PII, quality and training-review statuses. Publication of the derivative does not clear or alter those statuses."
+}
