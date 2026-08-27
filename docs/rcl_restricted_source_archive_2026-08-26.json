@@ -41,9 +41,15 @@
     "final_status": "pass"
   },
   "local_cleanup": {
-    "status": "pending_explicit_user_approval",
+    "status": "completed",
+    "completed_at": "2026-08-27T09:57:30.789Z",
     "candidate_files": 10348,
     "candidate_bytes": 3286664796,
+    "deleted_directories": 10,
+    "deleted_files": 10348,
+    "deleted_bytes": 3286664796,
+    "observed_free_space_delta_bytes": 3307040768,
+    "preserved_evidence_check": "pass",
     "scope": "Only raw_documents and extracted_text directories listed in the payload artifacts. Manifests, checksums, reports, annotations and run evidence must remain local."
   },
   "interpretation_boundary": "The private restricted archive is a storage and provenance artifact. It does not establish open licensing, PII clearance, quality approval, unrestricted redistribution rights, or training eligibility."
