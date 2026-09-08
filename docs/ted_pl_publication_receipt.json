@@ -1,0 +1,19 @@
+{
+  "audit": {
+    "observed_at": "2026-09-08T07:15:31.668441+00:00",
+    "pr_status": "open",
+    "verified_files": 30
+  },
+  "dataset": {
+    "documents": 15544,
+    "repository": "PiotrSty/ted-polish-procurement-notices",
+    "revision": "c2075874d36035e6cbc29b252155ac1da299cd13",
+    "tag": "v1.0.0",
+    "tokens_cl100k_base": 42475098
+  },
+  "dynaword_pr": {
+    "base_revision": "02bcb0b5f991a30f8454c6444f701633b71f69d4",
+    "revision": "b5e97456bb0273c24a21f059617d6a48b9904864",
+    "url": "https://huggingface.co/datasets/SlayerLab/polish-dynaword/discussions/32"
+  }
+}
